@@ -1,0 +1,6 @@
+dyniva_mail.mail_template_config_form:
+  title: 'dyniva mail template config'
+  route_name: dyniva_mail.mail_config_form
+  description: 'dyniva mail template config'
+  parent: system.admin_config_system
+  weight: 99

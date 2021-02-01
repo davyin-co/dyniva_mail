@@ -1,0 +1,9 @@
+dyniva_mail.mail_config_form:
+  path: '/admin/config/dyniva_mail/mail_config'
+  defaults:
+    _form: '\Drupal\dyniva_mail\Form\MailConfigForm'
+    _title: 'MailConfigForm'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE

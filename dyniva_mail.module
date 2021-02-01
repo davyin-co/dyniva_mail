@@ -1,0 +1,100 @@
+<?php
+
+/**
+ * @file
+ * Contains editing_mail.module.
+ */
+
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function dyniva_mail_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the editing_mail module.
+    case 'help.page.editing_mail':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Dyniva mail system') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_mail().
+ *
+ * Send HTML emails.
+ *
+ * @todo - Also add plain text alternative.
+ */
+function dyniva_mail_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'dyniva_mail':
+      if (!empty($params['headers'])) {
+        $message['headers'] = $params['headers'];
+      }
+      $message['headers']['Content-Type'] = 'text/html; charset=UTF-8;';
+      $message['subject'] = $params['subject'];
+
+      $body = $params['body'];
+      if (!is_array($body)) {
+        $body = [$body];
+      }
+
+      $message['body'] = array_map(function ($text) {
+        return Markup::create($text);
+      }, $body);
+      break;
+  }
+}
+
+/**
+ * Easy-to-use email sending function.
+ *
+ * @param $to
+ * @param $subject
+ * @param $body
+ * @param $params
+ *
+ * @return  (array)
+ *   Message array structure, as returned by drupal_mail(). Check for 'result' =
+ *   TRUE to verify that the message was sent (at least, according to PHP).
+ */
+function dyniva_sendmail($to, $subject, $body, $params = []) {
+  \Drupal::logger('dyniva_mail')->info("send mail to: " . $to);
+  $from = \Drupal::config('system.site')->get('mail');
+  $params['subject'] = $subject;
+  $params['body'] = $body;
+  $langcode = \Drupal::languageManager()->getDefaultLanguage();
+
+  // Send email with drupal_mail.
+  return \Drupal::service('plugin.manager.mail')->mail('dyniva_mail', 'dyniva_mail', $to, $langcode, $params, $from);
+}
+
+/**
+ * @param $to
+ * @param $subject
+ * @param $body
+ *
+ * @return bool
+ */
+function dyniva_sendmail_queue($to, $subject, $body, $params = []) {
+  $form = \Drupal::config('system.site')->get('mail');;
+
+  // create queue.
+  $queue_factory = \Drupal::service('queue');
+  $queue = $queue_factory->get('send_mail_queue');
+
+  $queue->createItem([
+    'form' => $form,
+    'to' => $to,
+    'subject' => $subject,
+    'body' => $body,
+    'params' => $params
+  ]);
+  return TRUE;
+}
