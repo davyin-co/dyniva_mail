@@ -1,0 +1,10 @@
+{
+    "name": "davyin/dyniva_mail",
+    "description": "dyniva_mail for drupal 8 +.",
+    "type": "drupal-custom-module",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://github.com/davyin-co/dyniva_mail",
+    "require": {
+        "drupal/core": "^8.6 || ^9"
+    }
+}
